@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+
+<head>
+    <meta charset="UTF-8">
+    <title>交易紀錄</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        /* 基本樣式設定 */
+
+        body {
+            margin: 0;
+            font-family: 'Noto Sans TC', sans-serif;
+            background: #f5f5f5;
+            color: #333;
+        }
+
+        header {
+            background: #3f51b5;
+            color: white;
+            padding: 15px 20px;
+        }
+
+        nav a {
+            color: white;
+            margin-right: 15px;
+            text-decoration: none;
+        }
+
+        h2 {
+            text-align: center;
+            margin-top: 30px;
+            color: #3f51b5;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 30px auto;
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        /* 區塊標題 */
+
+        h3 {
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+            margin-top: 30px;
+            margin-bottom: 20px;
+            color: #555;
+        }
+        /* 訂單卡片樣式 */
+
+        .order-card {
+            background: #f9f9f9;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 15px;
+            margin-bottom: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .order-card strong {
+            color: #3f51b5;
+        }
+
+        .order-card .status-pending {
+            color: orange;
+            font-weight: bold;
+        }
+
+        .order-card .status-completed {
+            color: green;
+            font-weight: bold;
+        }
+
+        .order-card .status-cancelled {
+            color: red;
+            font-weight: bold;
+        }
+
+        .order-card button {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.95em;
+            margin-top: 10px;
+            align-self: flex-start;
+            /* 讓按鈕靠左 */
+        }
+
+        .order-card .confirm-receipt-btn {
+            background-color: #28a745;
+            /* 綠色 */
+            color: white;
+        }
+
+        .order-card .confirm-receipt-btn:hover {
+            background-color: #218838;
+        }
+
+        .order-card .shipped-btn {
+            background-color: #007bff;
+            /* 藍色 */
+            color: white;
+        }
+
+        .order-card .shipped-btn:hover {
+            background-color: #0069d9;
+        }
+
+        .order-card .rate-btn {
+            background-color: #ffc107;
+            /* 黃色 */
+            color: #333;
+        }
+
+        .order-card .rate-btn:hover {
+            background-color: #e0a800;
+        }
+
+        .no-data-message {
+            text-align: center;
+            color: #777;
+            padding: 20px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <nav>
+            <a href="index.html">首頁</a>
+            <a href="profile.html">個人資料</a>
+            <a href="upload.html">上傳書籍</a>
+            <a href="seller.html">我的商品管理</a>
+            <a href="communicate.html">溝通</a>
+            <a href="TransactionRecords.html">交易紀錄</a>
+            <a href="evaluate.html">評價</a>
+        </nav>
+    </header>
+
+    <h2>📜 交易紀錄</h2>
+
+    <div class="container">
+        <h3>我購買的訂單</h3>
+        <div id="boughtOrders" class="order-list">
+            <p class="no-data-message">目前沒有購買紀錄。</p>
+        </div>
+
+        <h3>我售出的訂單</h3>
+        <div id="soldOrders" class="order-list">
+            <p class="no-data-message">目前沒有售出紀錄。</p>
+        </div>
+    </div>
+
+    <script>
+        const currentUser = JSON.parse(localStorage.getItem("currentUser"));
+
+        // 若尚未登入，導向登入頁面
+        if (!currentUser) {
+            alert("請先登入！");
+            window.location.href = "login.html";
+        }
+
+        const userAccount = currentUser.account || "未知使用者";
+
+        // 讀取所有書籍資料 (用於獲取書籍標題等)
+        const allBooks = JSON.parse(localStorage.getItem("books") || "[]");
+
+        // --- 模擬訂單資料 (實際應用中應從 localStorage 讀取) ---
+        // 訂單狀態: pending (待確認/處理), shipped (已出貨), completed (已完成), cancelled (已取消)
+        let allTransactions = JSON.parse(localStorage.getItem("transactions") || "[]");
+
+        // 如果 localStorage 中沒有 transactions，則初始化一些範例訂單
+        if (allTransactions.length === 0) {
+            allTransactions = [
+                // 我作為買家的訂單 (待處理)
+                {
+                    id: "TRX001",
+                    bookIsbn: "978-0321765723", // 賣家A的書
+                    buyerAccount: userAccount,
+                    sellerAccount: "sellerA",
+                    orderTime: "2025-05-20T10:00:00Z",
+                    status: "pending",
+                    isRatedByBuyer: false
+                },
+                // 我作為買家的訂單 (已出貨)
+                {
+                    id: "TRX002",
+                    bookIsbn: "978-1234567890", // 賣家B的書
+                    buyerAccount: userAccount,
+                    sellerAccount: "sellerB",
+                    orderTime: "2025-05-22T11:30:00Z",
+                    status: "shipped",
+                    isRatedByBuyer: false
+                },
+                // 我作為買家的訂單 (已完成，已評價)
+                {
+                    id: "TRX003",
+                    bookIsbn: "978-0123456789", // 賣家C的書
+                    buyerAccount: userAccount,
+                    sellerAccount: "sellerC",
+                    orderTime: "2025-05-15T09:00:00Z",
+                    status: "completed",
+                    isRatedByBuyer: true // 假設這筆已經評價過了
+                },
+                // 我作為賣家的訂單 (待處理)
+                {
+                    id: "TRX004",
+                    bookIsbn: "978-0123456789", // 我的書
+                    buyerAccount: "buyerX",
+                    sellerAccount: userAccount,
+                    orderTime: "2025-05-21T14:00:00Z",
+                    status: "pending",
+                    isRatedBySeller: false // 賣家是否已處理
+                },
+                // 我作為賣家的訂單 (已出貨)
+                {
+                    id: "TRX005",
+                    bookIsbn: "978-9876543210", // 我的另一本書
+                    buyerAccount: "buyerY",
+                    sellerAccount: userAccount,
+                    orderTime: "2025-05-18T16:00:00Z",
+                    status: "shipped",
+                    isRatedBySeller: false
+                }
+            ];
+            // 首次載入時，將範例資料存入 localStorage
+            localStorage.setItem("transactions", JSON.stringify(allTransactions));
+        }
+
+        // --- 儲存訂單資料回 localStorage ---
+        function saveTransactions() {
+            localStorage.setItem("transactions", JSON.stringify(allTransactions));
+        }
+
+        // --- 渲染我購買的訂單 ---
+        function renderBoughtOrders() {
+            const boughtOrdersContainer = document.getElementById("boughtOrders");
+            boughtOrdersContainer.innerHTML = ""; // 清空現有內容
+
+            const boughtOrders = allTransactions.filter(t => t.buyerAccount === userAccount);
+
+            if (boughtOrders.length === 0) {
+                boughtOrdersContainer.innerHTML = "<p class='no-data-message'>目前沒有購買紀錄。</p>";
+                return;
+            }
+
+            boughtOrders.forEach(order => {
+                const book = allBooks.find(b => b.isbn === order.bookIsbn);
+                const bookTitle = book ? book.title : "未知書籍";
+                const sellerName = order.sellerAccount;
+
+                let statusClass = '';
+                let statusText = '';
+                let actionButton = '';
+
+                switch (order.status) {
+                    case "pending":
+                        statusClass = "status-pending";
+                        statusText = "待賣家處理";
+                        break;
+                    case "shipped":
+                        statusClass = "status-pending"; // 買家視角仍是待處理完成
+                        statusText = "已出貨 (待收貨)";
+                        actionButton = `<button class="confirm-receipt-btn" data-order-id="${order.id}">✅ 確認收貨</button>`;
+                        break;
+                    case "completed":
+                        statusClass = "status-completed";
+                        statusText = "已完成";
+                        if (!order.isRatedByBuyer) {
+                            actionButton = `<button class="rate-btn" data-order-id="${order.id}">⭐ 去評價</button>`;
+                        }
+                        break;
+                    case "cancelled":
+                        statusClass = "status-cancelled";
+                        statusText = "已取消";
+                        break;
+                    default:
+                        statusClass = "";
+                        statusText = "未知狀態";
+                }
+
+                const card = document.createElement("div");
+                card.className = "order-card";
+                card.innerHTML = `
+                    <p>訂單 ID: <strong>${order.id}</strong></p>
+                    <p>書籍: <strong>${bookTitle}</strong></p>
+                    <p>賣家: <strong>${sellerName}</strong></p>
+                    <p>下單時間: ${new Date(order.orderTime).toLocaleString()}</p>
+                    <p>狀態: <span class="${statusClass}">${statusText}</span></p>
+                    ${actionButton}
+                `;
+                boughtOrdersContainer.appendChild(card);
+            });
+
+            // 為「確認收貨」按鈕添加事件監聽器
+            boughtOrdersContainer.querySelectorAll(".confirm-receipt-btn").forEach(button => {
+                button.addEventListener("click", function() {
+                    const orderId = this.dataset.orderId;
+                    const orderIndex = allTransactions.findIndex(t => t.id === orderId);
+
+                    if (orderIndex > -1) {
+                        if (confirm(`確定要確認訂單 ${orderId} 已收貨嗎？`)) {
+                            allTransactions[orderIndex].status = "completed";
+                            saveTransactions();
+                            alert("已確認收貨！訂單已完成。");
+                            renderBoughtOrders(); // 重新渲染列表
+                            // 這裡可以觸發評價提示或導向評價頁面
+                            // window.location.href = "evaluate.html";
+                        }
+                    }
+                });
+            });
+
+            // 為「去評價」按鈕添加事件監聽器 (導向評價頁面)
+            boughtOrdersContainer.querySelectorAll(".rate-btn").forEach(button => {
+                button.addEventListener("click", function() {
+                    alert("請前往評價頁面進行評價！"); // 或直接導向評價頁面
+                    window.location.href = "evaluate.html";
+                });
+            });
+        }
+
+        // --- 渲染我售出的訂單 ---
+        function renderSoldOrders() {
+            const soldOrdersContainer = document.getElementById("soldOrders");
+            soldOrdersContainer.innerHTML = ""; // 清空現有內容
+
+            const soldOrders = allTransactions.filter(t => t.sellerAccount === userAccount);
+
+            if (soldOrders.length === 0) {
+                soldOrdersContainer.innerHTML = "<p class='no-data-message'>目前沒有售出紀錄。</p>";
+                return;
+            }
+
+            soldOrders.forEach(order => {
+                const book = allBooks.find(b => b.isbn === order.bookIsbn);
+                const bookTitle = book ? book.title : "未知書籍";
+                const buyerName = order.buyerAccount;
+
+                let statusClass = '';
+                let statusText = '';
+                let actionButton = '';
+
+                switch (order.status) {
+                    case "pending":
+                        statusClass = "status-pending";
+                        statusText = "待處理";
+                        actionButton = `<button class="shipped-btn" data-order-id="${order.id}">📦 確認出貨</button>`;
+                        break;
+                    case "shipped":
+                        statusClass = "status-pending"; // 賣家視角仍是待完成
+                        statusText = "已出貨 (待買家收貨)";
+                        break;
+                    case "completed":
+                        statusClass = "status-completed";
+                        statusText = "已完成";
+                        break;
+                    case "cancelled":
+                        statusClass = "status-cancelled";
+                        statusText = "已取消";
+                        break;
+                    default:
+                        statusClass = "";
+                        statusText = "未知狀態";
+                }
+
+                const card = document.createElement("div");
+                card.className = "order-card";
+                card.innerHTML = `
+                    <p>訂單 ID: <strong>${order.id}</strong></p>
+                    <p>書籍: <strong>${bookTitle}</strong></p>
+                    <p>買家: <strong>${buyerName}</strong></p>
+                    <p>下單時間: ${new Date(order.orderTime).toLocaleString()}</p>
+                    <p>狀態: <span class="${statusClass}">${statusText}</span></p>
+                    ${actionButton}
+                `;
+                soldOrdersContainer.appendChild(card);
+            });
+
+            // 為「確認出貨」按鈕添加事件監聽器
+            soldOrdersContainer.querySelectorAll(".shipped-btn").forEach(button => {
+                button.addEventListener("click", function() {
+                    const orderId = this.dataset.orderId;
+                    const orderIndex = allTransactions.findIndex(t => t.id === orderId);
+
+                    if (orderIndex > -1) {
+                        if (confirm(`確定要確認訂單 ${orderId} 已出貨嗎？`)) {
+                            allTransactions[orderIndex].status = "shipped";
+                            saveTransactions();
+                            alert("已確認出貨！");
+                            renderSoldOrders(); // 重新渲染列表
+                        }
+                    }
+                });
+            });
+        }
+
+        // 頁面載入時執行
+        document.addEventListener("DOMContentLoaded", () => {
+            renderBoughtOrders();
+            renderSoldOrders();
+        });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>書籍上傳</title>
+    <style>
+        body {
+            margin: 0;
+            background: #f7f8fa;
+            color: #333;
+        }
+
+        header {
+            background: #3f51b5;
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        nav a {
+            color: white;
+            margin: 0 10px;
+            text-decoration: none;
+        }
+
+        .upload-container {
+            max-width: 600px;
+            margin: 40px auto;
+            padding: 30px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .upload-container h2 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .upload-form label {
+            font-weight: bold;
+            display: block;
+            margin-top: 15px;
+        }
+
+        .upload-form input,
+        .upload-form textarea {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        .upload-form button {
+            margin-top: 20px;
+            width: 100%;
+            padding: 12px;
+            background: #3f51b5;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        .upload-form button:hover {
+            background: #303f9f;
+        }
+
+        .image-preview {
+            margin-top: 10px;
+            max-width: 100%;
+            height: auto;
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <nav>
+            <a href="index.html">首頁</a>
+            <a href="profile.html">個人資料</a>
+            <a href="upload.html">上傳書籍</a>
+            <a href="seller.html">我的商品管理</a>
+            <a href="communicate.html">溝通</a>
+            <a href="TransactionRecords.html">交易紀錄</a>
+            <a href="evaluate.html">評價</a>
+        </nav>
+    </header>
+    <div class="upload-container">
+        <h2>📤 上傳書籍資訊</h2>
+        <form class="upload-form" id="bookUploadForm">
+            <label for="title">書名</label>
+            <input type="text" id="title" required />
+
+            <label for="author">作者</label>
+            <input type="text" id="author" required />
+
+            <label for="isbn">ISBN</label>
+            <input type="text" id="isbn" required />
+
+            <label for="price">價格（NT$）</label>
+            <input type="number" id="price" required min="0" />
+
+            <label for="description">書籍描述</label>
+            <textarea id="description" rows="4" placeholder="例如：八成新、有筆記、不影響閱讀"></textarea>
+
+            <label for="image">上傳封面圖片</label>
+            <input type="file" id="image" accept="image/*" />
+            <img id="imagePreview" class="image-preview" alt="圖片預覽" />
+
+            <button type="submit">✅ 確認上傳</button>
+        </form>
+    </div>
+
+    <script>
+        // 圖片預覽功能
+        document.getElementById("image").addEventListener("change", function() {
+            const file = this.files[0];
+            const preview = document.getElementById("imagePreview");
+
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    preview.src = e.target.result;
+                    preview.style.display = "block";
+                };
+                reader.readAsDataURL(file);
+            } else {
+                preview.src = "";
+                preview.style.display = "none";
+            }
+        });
+
+        // 表單提交，存到 localStorage
+        document.getElementById("bookUploadForm").addEventListener("submit", function(e) {
+            e.preventDefault();
+
+            const title = document.getElementById("title").value.trim();
+            const author = document.getElementById("author").value.trim();
+            const isbn = document.getElementById("isbn").value.trim();
+            const price = document.getElementById("price").value.trim();
+            const description = document.getElementById("description").value.trim();
+            const imagePreview = document.getElementById("imagePreview").src;
+            const currentUser = JSON.parse(localStorage.getItem("currentUser"));
+
+            if (!currentUser) {
+                alert("請先登入！");
+                window.location.href = "login.html";
+            }
+
+            if (!title || !author || !isbn || !price) {
+                alert("請填寫所有必填欄位！");
+                return;
+            }
+
+            // 讀取現有書籍陣列
+            const booksJSON = localStorage.getItem("books");
+            let books = [];
+            try {
+                books = booksJSON ? JSON.parse(booksJSON) : [];
+            } catch {
+                books = [];
+            }
+
+            // 新書籍物件
+            const newBook = {
+                title,
+                author,
+                isbn,
+                price,
+                description,
+                imageDataUrl: imagePreview && imagePreview.startsWith("data:image") ? imagePreview : null,
+                uploadTime: new Date().toISOString(),
+                uploadedBy: currentUser.username || "未知使用者"
+            };
+
+            books.push(newBook);
+
+            localStorage.setItem("books", JSON.stringify(books));
+
+            alert("書籍上傳成功！即將跳到商品管理。");
+
+            // 跳回首頁
+            window.location.href = "seller.html";
+        });
+    </script>
+</body>
+
+</html>

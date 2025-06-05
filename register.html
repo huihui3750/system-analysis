@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>註冊</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <!-- 載入 Noto Sans TC 字型（適合中文顯示） -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC&display=swap" rel="stylesheet" />
+
+    <style>
+        /* 全域樣式設定，統一字型與盒模型 */
+
+        * {
+            box-sizing: border-box;
+            font-family: "Noto Sans TC", sans-serif;
+        }
+        /* 背景與版面配置 */
+
+        body {
+            margin: 0;
+            background: #f0f2f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        /* 表單容器樣式 */
+
+        .form-container {
+            background-color: white;
+            padding: 40px 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 400px;
+        }
+        /* 標題樣式 */
+
+        h2 {
+            text-align: center;
+            margin-bottom: 25px;
+            color: #333;
+        }
+        /* 表單整體為垂直排列 */
+
+        form {
+            display: flex;
+            flex-direction: column;
+        }
+        /* 輸入欄位樣式 */
+
+        input[type="text"],
+        input[type="email"],
+        input[type="password"] {
+            padding: 12px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 16px;
+        }
+        /* 按鈕樣式 */
+
+        button {
+            padding: 12px;
+            background-color: #3f51b5;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+        /* 滑鼠移上按鈕時變色 */
+
+        button:hover {
+            background-color: #303f9f;
+        }
+        /* 底部文字樣式 */
+
+        p {
+            text-align: center;
+            margin-top: 15px;
+        }
+        /* 超連結樣式 */
+
+        a {
+            color: #3f51b5;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="form-container">
+        <h2>📝 註冊新帳號</h2>
+
+        <!-- 註冊表單 -->
+        <form id="registerForm">
+            <input type="text" id="account" placeholder="帳號" required />
+            <input type="password" id="registerPassword" placeholder="密碼" required />
+            <input type="password" id="confirmPassword" placeholder="確認密碼" required />
+            <input type="email" id="registerEmail" placeholder="Email" required />
+            <button type="submit">註冊</button>
+
+            <!-- 提供登入連結 -->
+            <p>已經有帳號了？<a href="login.html">登入</a></p>
+        </form>
+    </div>
+
+    <script>
+        // 綁定表單提交事件
+        document.getElementById("registerForm").addEventListener("submit", function(e) {
+            e.preventDefault(); // 防止預設提交行為（頁面重新整理）
+
+            // 取得使用者輸入的資料
+            const account = document.getElementById("account").value.trim();
+            const password = document.getElementById("registerPassword").value;
+            const confirm = document.getElementById("confirmPassword").value;
+            const email = document.getElementById("registerEmail").value.trim();
+
+            // 檢查是否有欄位沒填
+            if (!account || !password || !confirm || !email) {
+                alert("請填寫所有欄位！");
+                return;
+            }
+
+            // 確認密碼是否一致
+            if (password !== confirm) {
+                alert("密碼不一致！");
+                return;
+            }
+
+            // 從 localStorage 讀取現有使用者資料，若無則為空陣列
+            let users = JSON.parse(localStorage.getItem("users") || "[]");
+
+            // 檢查帳號或 email 是否已註冊
+            const exists = users.some(u => u.account === account || u.email === email);
+            if (exists) {
+                alert("帳號或 Email 已被註冊！");
+                return;
+            }
+
+            // 將新使用者加入 users 陣列
+            users.push({
+                account,
+                password,
+                email
+            });
+
+            // 儲存至 localStorage
+            localStorage.setItem("users", JSON.stringify(users));
+
+            // 顯示註冊成功提示並導向登入頁面
+            alert("註冊成功！");
+            window.location.href = "login.html";
+        });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>校園二手書交易平台-首頁</title>
+    <link rel="stylesheet" href="styles.css" />
+    <style>
+        /* 簡單的書籍卡片樣式 */
+
+        .book-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .book-card {
+            width: 200px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 10px;
+            box-shadow: 0 0 8px rgba(0, 0, 0, 0.05);
+            background: white;
+        }
+
+        .book-card img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 4px;
+            margin-bottom: 8px;
+        }
+
+        .book-card h3 {
+            margin: 0 0 6px 0;
+            font-size: 18px;
+        }
+
+        .book-card p {
+            margin: 4px 0;
+            font-size: 14px;
+            color: #555;
+        }
+
+        nav a {
+            margin-right: 10px;
+            text-decoration: none;
+            color: white;
+        }
+
+        nav a:hover {
+            text-decoration: underline;
+        }
+
+        .hero {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <h1>📚 校園二手書交易平台</h1>
+        <nav>
+            <a href="index.html">首頁</a>
+            <a href="profile.html">個人資料</a>
+            <a href="upload.html">上傳書籍</a>
+            <a href="seller.html">我的商品管理</a>
+            <a href="communicate.html">溝通</a>
+            <a href="TransactionRecords.html">交易紀錄</a>
+            <a href="evaluate.html">評價</a>
+        </nav>
+    </header>
+
+    <section class="hero">
+        <h2>歡迎來到最棒的二手書平台！</h2>
+        <p>省錢、環保又便利，快來找找你的下一本書吧！</p>
+        <input type="text" id="searchInput" placeholder="輸入書名、作者或 ISBN" />
+        <button onclick="searchBooks()">🔍 搜尋</button>
+    </section>
+
+    <section class="book-list" id="bookList">
+        <!-- 書籍卡片會動態生成 -->
+    </section>
+
+    <footer>
+        <p>&copy; 2025 校園二手書交易平台</p>
+    </footer>
+
+    <script>
+        // 從 localStorage 讀取書籍陣列
+        function loadBooks() {
+            const booksJSON = localStorage.getItem("books");
+            if (!booksJSON) return [];
+            try {
+                return JSON.parse(booksJSON);
+            } catch {
+                return [];
+            }
+        }
+
+        // 存回 localStorage
+        function saveBooks(books) {
+            localStorage.setItem("books", JSON.stringify(books));
+        }
+
+        // 下架書籍功能，根據 ISBN 移除
+        function removeBook(isbn) {
+            let books = loadBooks();
+            books = books.filter(book => book.isbn !== isbn);
+            saveBooks(books);
+            renderBooks(); // 重新渲染全部書籍
+        }
+
+        // 渲染書籍卡片（可傳入特定書籍清單）
+        function renderBooks(bookList) {
+            const books = bookList || loadBooks();
+            const container = document.getElementById("bookList");
+            container.innerHTML = "";
+
+            if (books.length === 0) {
+                container.innerHTML = "<p>沒有找到符合條件的書籍。</p>";
+                return;
+            }
+
+            books.forEach((book) => {
+                const card = document.createElement("div");
+                card.className = "book-card";
+
+                const imgSrc = book.imageDataUrl || "https://via.placeholder.com/150x200?text=無圖片";
+
+                card.innerHTML = `
+                    <img src="${imgSrc}" alt="書籍封面" />
+                    <h3>${book.title}</h3>
+                    <p>作者: ${book.author}</p>
+                    <p>ISBN: ${book.isbn}</p>
+                    <p>價格: NT$${book.price}</p>
+                    <p>${book.description || ""}</p>
+                    <button class="remove-btn">下架</button>
+                `;
+
+                // 綁定下架按鈕事件
+                card.querySelector(".remove-btn").addEventListener("click", () => {
+                    if (confirm(`確定要下架《${book.title}》嗎？`)) {
+                        removeBook(book.isbn);
+                    }
+                });
+
+                container.appendChild(card);
+            });
+        }
+
+        // 搜尋書籍
+        function searchBooks() {
+            const keyword = document.getElementById("searchInput").value.trim().toLowerCase();
+            const books = loadBooks();
+
+            const filteredBooks = books.filter(book =>
+                book.title.toLowerCase().includes(keyword) ||
+                book.author.toLowerCase().includes(keyword) ||
+                book.isbn.toLowerCase().includes(keyword)
+            );
+
+            renderBooks(filteredBooks);
+        }
+
+        // 初始化頁面渲染
+        renderBooks();
+    </script>
+</body>
+
+</html>

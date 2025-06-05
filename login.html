@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+
+<head>
+    <meta charset="UTF-8">
+    <title>登入</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC&display=swap" rel="stylesheet" />
+    <style>
+        /* 全域樣式設定，統一字型與盒模型 */
+
+        * {
+            box-sizing: border-box;
+            font-family: "Noto Sans TC", sans-serif;
+        }
+        /* 背景與版面配置 */
+
+        body {
+            margin: 0;
+            background: #f0f2f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        /* 表單容器樣式 */
+
+        .form-container {
+            background-color: white;
+            padding: 40px 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 400px;
+        }
+        /* 標題樣式 */
+
+        h2 {
+            text-align: center;
+            margin-bottom: 25px;
+            color: #333;
+        }
+        /* 表單整體為垂直排列 */
+
+        form {
+            display: flex;
+            flex-direction: column;
+        }
+        /* 輸入欄位樣式 */
+
+        input[type="text"],
+        /* 新增 text 類型 */
+
+        input[type="password"] {
+            padding: 12px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 16px;
+        }
+        /* 按鈕樣式 */
+
+        button {
+            padding: 12px;
+            background-color: #3f51b5;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+        /* 滑鼠移上按鈕時變色 */
+
+        button:hover {
+            background-color: #303f9f;
+        }
+        /* 底部文字樣式 */
+
+        p {
+            text-align: center;
+            margin-top: 15px;
+        }
+        /* 超連結樣式 */
+
+        a {
+            color: #3f51b5;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="form-container">
+        <h2>🔐 登入帳戶</h2>
+        <form id="loginForm">
+            <input type="text" id="loginAccount" placeholder="請輸入帳號" required>
+            <input type="password" id="loginPassword" placeholder="請輸入密碼" required>
+            <button type="submit">登入</button>
+            <p>還沒有帳號？<a href="register.html">註冊</a></p>
+        </form>
+    </div>
+
+    <script>
+        document.getElementById("loginForm").addEventListener("submit", function(e) {
+            e.preventDefault();
+            // 從 loginAccount 取得帳號
+            const account = document.getElementById("loginAccount").value.trim();
+            const password = document.getElementById("loginPassword").value;
+
+            if (!account || !password) { // 檢查帳號或密碼是否為空
+                alert("請填寫完整資訊！");
+                return;
+            }
+
+            // 從 localStorage 拿用戶資料（陣列）
+            const users = JSON.parse(localStorage.getItem("users") || "[]");
+
+            // 找出是否有符合「帳號」和「密碼」的用戶
+            const user = users.find(u => u.account === account && u.password === password);
+
+            if (user) {
+                // 登入成功，將當前用戶資料存入登入狀態
+                localStorage.setItem("currentUser", JSON.stringify(user));
+                alert("登入成功！");
+                window.location.href = "index.html";
+            } else {
+                alert("帳號或密碼錯誤！");
+            }
+        });
+    </script>
+</body>
+
+</html>

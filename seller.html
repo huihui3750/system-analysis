@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+
+<head>
+    <meta charset="UTF-8">
+    <title>我的商品管理</title>
+    <style>
+        /* 基本樣式設定 */
+
+        body {
+            margin: 0;
+            font-family: Arial;
+            background: #f5f5f5;
+        }
+
+        header {
+            background: #3f51b5;
+            color: white;
+            padding: 15px 20px;
+        }
+
+        nav a {
+            color: white;
+            margin-right: 15px;
+            text-decoration: none;
+        }
+
+        h2 {
+            text-align: center;
+            margin-top: 20px;
+        }
+        /* 書籍卡片列表排版 */
+
+        .book-list {
+            max-width: 900px;
+            margin: 20px auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .book-card {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .book-card img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 4px;
+        }
+        /* 按鈕列樣式 */
+
+        .actions {
+            margin-top: 10px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .actions button {
+            padding: 6px 10px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .edit-btn {
+            background-color: #4caf50;
+            color: white;
+        }
+
+        .delete-btn {
+            background-color: #f44336;
+            color: white;
+        }
+        /* 修改表單樣式 */
+
+        .edit-form {
+            display: none;
+            margin-top: 10px;
+        }
+
+        .edit-form input,
+        .edit-form textarea {
+            width: 100%;
+            margin-top: 5px;
+            margin-bottom: 10px;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        .edit-form button {
+            background-color: #3f51b5;
+            color: white;
+            width: 100%;
+        }
+
+        footer {
+            text-align: center;
+            padding: 20px;
+            background: #f0f0f0;
+            margin-top: 40px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- 導覽列 -->
+    <header>
+        <nav>
+            <a href="index.html">首頁</a>
+            <a href="profile.html">個人資料</a>
+            <a href="upload.html">上傳書籍</a>
+            <a href="seller.html">我的商品管理</a>
+            <a href="communicate.html">溝通</a>
+            <a href="TransactionRecords.html">交易紀錄</a>
+            <a href="evaluate.html">評價</a>
+        </nav>
+    </header>
+
+    <h2>🛍️ 我的商品列表</h2>
+    <div class="book-list" id="sellerBooks"></div>
+
+    <script>
+        // 讀取當前登入使用者
+        const currentUser = JSON.parse(localStorage.getItem("currentUser"));
+
+        // 若尚未登入，導向登入頁面
+        if (!currentUser) {
+            alert("請先登入！");
+            window.location.href = "login.html";
+        }
+
+        // 從 localStorage 讀取所有書籍資料
+        let books = JSON.parse(localStorage.getItem("books") || "[]");
+        const sellerBooks = document.getElementById("sellerBooks");
+
+        // 將書籍資料儲存回 localStorage
+        function saveBooks() {
+            localStorage.setItem("books", JSON.stringify(books));
+        }
+
+        // 顯示當前使用者的上傳書籍
+        function renderBooks() {
+            sellerBooks.innerHTML = "";
+
+            // 過濾只顯示該使用者的書籍
+            const userBooks = books.filter(book => book.uploadedBy === currentUser.username);
+
+            // 沒有商品時顯示提示
+            if (userBooks.length === 0) {
+                sellerBooks.innerHTML = "<p style='text-align:center;'>尚未上傳任何商品。</p>";
+                return;
+            }
+
+            // 對每本書建立卡片
+            userBooks.forEach((book, indexInUserBooks) => {
+                        // 找到書籍在 books 陣列中的實際 index
+                        const index = books.findIndex(b =>
+                            b.title === book.title &&
+                            b.isbn === book.isbn &&
+                            b.uploadedBy === currentUser.username
+                        );
+
+                        const card = document.createElement("div");
+                        card.className = "book-card";
+
+                        // 顯示書籍資訊與操作按鈕
+                        card.innerHTML = `
+                    ${book.imageDataUrl ? `<img src="${book.imageDataUrl}" alt="封面">` : ""}
+                    <h3>${book.title}</h3>
+                    <p>作者：${book.author}</p>
+                    <p>ISBN：${book.isbn}</p>
+                    <p>價格：NT$${parseFloat(book.price)}</p>
+                    <p>描述：${book.description}</p>
+                    <p>上傳時間：${new Date(book.uploadTime).toLocaleString()}</p>
+
+                    <div class="actions">
+                        <button class="edit-btn">✏️ 修改</button>
+                        <button class="delete-btn">🗑️ 下架</button>
+                    </div>
+
+                    <div class="edit-form">
+                        <input type="text" class="edit-title" value="${book.title}">
+                        <input type="text" class="edit-author" value="${book.author}">
+                        <input type="text" class="edit-isbn" value="${book.isbn}">
+                        <input type="number" class="edit-price" value="${book.price}">
+                        <textarea class="edit-description">${book.description}</textarea>
+                        <button class="save-edit">💾 儲存修改</button>
+                    </div>
+                `;
+
+                // 點擊「修改」按鈕，顯示或隱藏編輯表單
+                const editBtn = card.querySelector(".edit-btn");
+                const editForm = card.querySelector(".edit-form");
+                editBtn.addEventListener("click", () => {
+                    editForm.style.display = editForm.style.display === "block" ? "none" : "block";
+                });
+
+                // 點擊「儲存修改」按鈕
+                const saveBtn = card.querySelector(".save-edit");
+                saveBtn.addEventListener("click", () => {
+                    const newTitle = card.querySelector(".edit-title").value.trim();
+                    const newAuthor = card.querySelector(".edit-author").value.trim();
+                    const newIsbn = card.querySelector(".edit-isbn").value.trim();
+                    const newPrice = parseFloat(card.querySelector(".edit-price").value);
+                    const newDescription = card.querySelector(".edit-description").value.trim();
+
+                    // 基本欄位驗證
+                    if (!newTitle || !newAuthor || !newIsbn || isNaN(newPrice)) {
+                        alert("所有欄位都是必填的！");
+                        return;
+                    }
+
+                    // 更新書籍資料
+                    books[index] = {
+                        ...books[index],
+                        title: newTitle,
+                        author: newAuthor,
+                        isbn: newIsbn,
+                        price: newPrice,
+                        description: newDescription
+                    };
+
+                    saveBooks();     // 儲存到 localStorage
+                    renderBooks();   // 重新渲染畫面
+                });
+
+                // 點擊「下架」按鈕
+                const deleteBtn = card.querySelector(".delete-btn");
+                deleteBtn.addEventListener("click", () => {
+                    if (confirm("確定要下架這本書嗎？")) {
+                        books.splice(index, 1); // 刪除該書
+                        saveBooks();
+                        renderBooks();
+                    }
+                });
+
+                // 加入畫面
+                sellerBooks.appendChild(card);
+            });
+        }
+
+        // 初始執行
+        renderBooks();
+    </script>
+
+    <footer>
+        &copy; 2025 校園二手書交易平台.
+    </footer>
+</body>
+
+</html>

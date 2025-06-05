@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+
+<head>
+    <meta charset="UTF-8">
+    <title>溝通</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        /* 基本樣式設定 */
+
+        body {
+            margin: 0;
+            font-family: 'Noto Sans TC', sans-serif;
+            background: #f5f5f5;
+            color: #333;
+        }
+
+        header {
+            background: #3f51b5;
+            color: white;
+            padding: 15px 20px;
+        }
+
+        nav a {
+            color: white;
+            margin-right: 15px;
+            text-decoration: none;
+        }
+
+        h2 {
+            text-align: center;
+            margin-top: 30px;
+            color: #3f51b5;
+        }
+
+        .chat-container {
+            max-width: 800px;
+            margin: 30px auto;
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            height: 70vh;
+            /* 設定高度，讓聊天紀錄可滾動 */
+        }
+
+        .chat-header {
+            text-align: center;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+            color: #555;
+        }
+
+        .chat-messages {
+            flex-grow: 1;
+            /* 讓訊息區塊佔滿可用空間 */
+            overflow-y: auto;
+            /* 訊息過多時可滾動 */
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background: #e9e9e9;
+            margin-bottom: 15px;
+        }
+
+        .message-bubble {
+            max-width: 70%;
+            padding: 10px 15px;
+            border-radius: 18px;
+            margin-bottom: 10px;
+            line-height: 1.4;
+            word-wrap: break-word;
+            /* 避免文字溢出 */
+        }
+
+        .message-sent {
+            background-color: #dcf8c6;
+            /* 淺綠色 */
+            align-self: flex-end;
+            /* 靠右對齊 */
+            margin-left: auto;
+            /* 推到最右邊 */
+        }
+
+        .message-received {
+            background-color: #f1f0f0;
+            /* 淺灰色 */
+            align-self: flex-start;
+            /* 靠左對齊 */
+            margin-right: auto;
+            /* 推到最左邊 */
+        }
+
+        .message-info {
+            font-size: 0.8em;
+            color: #777;
+            margin-top: 5px;
+            text-align: right;
+        }
+
+        .message-received .message-info {
+            text-align: left;
+        }
+
+        .chat-input {
+            display: flex;
+            gap: 10px;
+        }
+
+        .chat-input input[type="text"] {
+            flex-grow: 1;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 20px;
+            /* 圓角輸入框 */
+            font-size: 1em;
+        }
+
+        .chat-input button {
+            padding: 10px 20px;
+            background-color: #3f51b5;
+            color: white;
+            border: none;
+            border-radius: 20px;
+            /* 圓角按鈕 */
+            cursor: pointer;
+            font-size: 1em;
+        }
+
+        .chat-input button:hover {
+            background-color: #303f9f;
+        }
+
+        .no-chat-message {
+            text-align: center;
+            color: #777;
+            padding: 20px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <nav>
+            <a href="index.html">首頁</a>
+            <a href="profile.html">個人資料</a>
+            <a href="upload.html">上傳書籍</a>
+            <a href="seller.html">我的商品管理</a>
+            <a href="communicate.html">溝通</a>
+            <a href="TransactionRecords.html">交易紀錄</a>
+            <a href="evaluate.html">評價</a>
+        </nav>
+    </header>
+
+    <h2>💬 訊息中心</h2>
+
+    <div class="chat-container">
+        <div class="chat-header" id="chatHeader">請選擇聊天對象或從訂單/書籍頁面進入</div>
+        <div class="chat-messages" id="chatMessages">
+            <p class="no-chat-message">目前沒有訊息。</p>
+        </div>
+        <div class="chat-input">
+            <input type="text" id="messageInput" placeholder="輸入訊息...">
+            <button id="sendMessageBtn">傳送</button>
+        </div>
+    </div>
+
+    <script>
+        const currentUser = JSON.parse(localStorage.getItem("currentUser"));
+
+        // 若尚未登入，導向登入頁面
+        if (!currentUser) {
+            alert("請先登入！");
+            window.location.href = "login.html";
+        }
+
+        const userAccount = currentUser.account || "未知使用者";
+
+        // 從 URL 參數獲取聊天對象帳號 (例如: communicate.html?talkTo=sellerA&bookIsbn=...)
+        const urlParams = new URLSearchParams(window.location.search);
+        const talkToAccount = urlParams.get('talkTo'); // 聊天對象的帳號
+        const relatedBookIsbn = urlParams.get('bookIsbn'); // 相關書籍的 ISBN
+
+        const chatHeader = document.getElementById("chatHeader");
+        const chatMessagesDiv = document.getElementById("chatMessages");
+        const messageInput = document.getElementById("messageInput");
+        const sendMessageBtn = document.getElementById("sendMessageBtn");
+
+        let currentChatId = null; // 當前聊天的唯一 ID
+
+        // 讀取所有聊天紀錄
+        let allChats = JSON.parse(localStorage.getItem("chats") || "[]");
+
+        // 如果沒有指定聊天對象，則顯示提示並禁用輸入框
+        if (!talkToAccount) {
+            chatHeader.textContent = "請從書籍詳情或訂單紀錄點擊聯絡賣家/買家";
+            messageInput.disabled = true;
+            sendMessageBtn.disabled = true;
+            chatMessagesDiv.innerHTML = "<p class='no-chat-message'>請從其他頁面（如書籍詳情或訂單紀錄）點擊聯絡按鈕，以開始與特定對象的對話。</p>";
+        } else {
+            // 建立聊天 ID，確保買家和賣家之間的對話是唯一的
+            // 規則：將兩個帳號按字母順序排序，然後加上書籍 ISBN (如果有的話)
+            const participants = [userAccount, talkToAccount].sort();
+            currentChatId = `${participants[0]}_${participants[1]}${relatedBookIsbn ? '_' + relatedBookIsbn : ''}`;
+            chatHeader.textContent = `與 ${talkToAccount} 溝通${relatedBookIsbn ? ` (關於書籍: ${relatedBookIsbn})` : ''}`;
+            messageInput.disabled = false;
+            sendMessageBtn.disabled = false;
+        }
+
+        // 儲存聊天紀錄到 localStorage
+        function saveChats() {
+            localStorage.setItem("chats", JSON.stringify(allChats));
+        }
+
+        // 渲染當前聊天紀錄
+        function renderMessages() {
+            chatMessagesDiv.innerHTML = ""; // 清空現有內容
+
+            if (!currentChatId) {
+                // 如果沒有聊天 ID，則不渲染訊息，避免錯誤
+                return;
+            }
+
+            const chat = allChats.find(c => c.chatId === currentChatId);
+
+            if (!chat || chat.messages.length === 0) {
+                chatMessagesDiv.innerHTML = "<p class='no-chat-message'>目前沒有訊息。</p>";
+                return;
+            }
+
+            chat.messages.forEach(msg => {
+                const bubble = document.createElement("div");
+                bubble.className = `message-bubble ${msg.sender === userAccount ? 'message-sent' : 'message-received'}`;
+                bubble.innerHTML = `
+                    ${msg.content}
+                    <div class="message-info">${msg.sender} @ ${new Date(msg.timestamp).toLocaleString()}</div>
+                `;
+                chatMessagesDiv.appendChild(bubble);
+            });
+
+            // 滾動到最新訊息
+            chatMessagesDiv.scrollTop = chatMessagesDiv.scrollHeight;
+        }
+
+        // 傳送訊息
+        sendMessageBtn.addEventListener("click", sendMessage);
+        messageInput.addEventListener("keypress", (e) => {
+            if (e.key === "Enter") {
+                sendMessage();
+            }
+        });
+
+        function sendMessage() {
+            if (!currentChatId) {
+                alert("請先選擇聊天對象！");
+                return;
+            }
+
+            const messageContent = messageInput.value.trim();
+            if (messageContent === "") {
+                alert("訊息不能為空！");
+                return;
+            }
+
+            const newMessage = {
+                sender: userAccount,
+                content: messageContent,
+                timestamp: new Date().toISOString()
+            };
+
+            let chat = allChats.find(c => c.chatId === currentChatId);
+
+            if (!chat) {
+                // 如果是新的聊天，則創建一個新的聊天物件
+                chat = {
+                    chatId: currentChatId,
+                    participants: [userAccount, talkToAccount],
+                    bookIsbn: relatedBookIsbn, // 綁定相關書籍 ISBN
+                    messages: []
+                };
+                allChats.push(chat);
+            }
+
+            chat.messages.push(newMessage);
+            saveChats(); // 儲存更新後的聊天紀錄
+
+            messageInput.value = ""; // 清空輸入框
+            renderMessages(); // 重新渲染訊息
+        }
+
+        // 初始載入訊息
+        document.addEventListener("DOMContentLoaded", () => {
+            if (talkToAccount) {
+                renderMessages();
+            }
+        });
+    </script>
+</body>
+
+</html>
