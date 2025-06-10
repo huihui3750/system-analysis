@@ -1,0 +1,385 @@
+/* 通用樣式設定 */
+
+* {
+    box-sizing: border-box;
+    font-family: 'Noto Sans TC', sans-serif;
+}
+
+body {
+    margin: 0;
+    background: #f9f9f9;
+    color: #333;
+    min-height: 100vh;
+    /* 確保 body 至少佔滿視窗高度 */
+    display: flex;
+    flex-direction: column;
+    /* 讓內容垂直排列，footer 到底部 */
+}
+
+
+/* Header 樣式 - 使用 Flexbox 實現左右對齊 */
+
+header {
+    background: #3f51b5;
+    color: white;
+    padding: 15px 25px;
+    /* 調整 padding，讓空間更寬裕 */
+    display: flex;
+    /* 啟用 Flexbox */
+    justify-content: space-between;
+    /* 讓內容（Logo/Title 和 Nav）兩端對齊 */
+    align-items: center;
+    /* 垂直居中對齊 */
+    flex-wrap: wrap;
+    /* 允許換行以適應小螢幕 */
+    position: sticky;
+    /* 讓 header 固定在頂部 */
+    top: 0;
+    z-index: 1000;
+    /* 確保 header 在最上層 */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    /* 增加陰影美化 */
+}
+
+.logo-title h1 {
+    margin: 0;
+    /* 移除 h1 預設外邊距 */
+    font-size: 1.8em;
+    /* 調整標題大小 */
+    white-space: nowrap;
+    /* 防止標題換行 */
+    flex-shrink: 0;
+    /* 防止縮小 */
+}
+
+
+/* Nav 樣式 - 也使用 Flexbox */
+
+header nav {
+    display: flex;
+    /* 啟用 Flexbox */
+    align-items: center;
+    /* 垂直居中對齊 */
+    gap: 15px;
+    /* 導航連結之間的間距 */
+    margin-top: 0;
+    /* 移除舊的 margin-top，因為現在是 Flex 佈局 */
+    flex-wrap: wrap;
+    /* 允許連結換行以適應小螢幕 */
+    /* 讓 nav 佔據剩餘空間並將其內容推到右邊 */
+    margin-left: auto;
+    /* 將 nav 推到最右邊 */
+    justify-content: flex-end;
+    /* 讓 nav 內部的項目靠右對齊 */
+}
+
+header nav a {
+    color: white;
+    text-decoration: none;
+    padding: 8px 12px;
+    /* 增加點擊區域和美化 */
+    transition: background-color 0.3s ease, border-radius 0.3s ease;
+    border-radius: 4px;
+    /* 預設圓角 */
+    white-space: nowrap;
+    /* 防止連結文字換行 */
+}
+
+header nav a:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+
+/* 用戶狀態區塊樣式 (帳號名稱/登入/個人資料) */
+
+.user-status {
+    display: flex;
+    /* 讓內部元素（span和a）水平排列 */
+    align-items: center;
+    /* 垂直居中 */
+    gap: 15px;
+    /* 元素間距 */
+    margin-left: 25px;
+    /* 將此區塊與其他導航連結區隔開 */
+    white-space: nowrap;
+    /* 防止帳號名稱或按鈕換行 */
+    /* 美化：增加一個背景或邊框 */
+    background-color: rgba(255, 255, 255, 0.1);
+    /* 輕微的半透明背景 */
+    padding: 8px 15px;
+    border-radius: 20px;
+    /* 更圓潤的邊角 */
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+    /* 輕微陰影 */
+}
+
+.user-status span {
+    font-weight: bold;
+    color: white;
+    font-size: 1.1em;
+    /* 字體稍微大一點 */
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+    /* 增加文字陰影 */
+}
+
+.user-status .user-link {
+    color: white;
+    text-decoration: none;
+    padding: 8px 15px;
+    /* 增加按鈕的點擊區域 */
+    border: 1px solid white;
+    border-radius: 20px;
+    /* 更圓潤的按鈕邊角 */
+    transition: background-color 0.3s ease, border-color 0.3s ease;
+    font-weight: bold;
+}
+
+.user-status .user-link:hover {
+    background-color: rgba(255, 255, 255, 0.3);
+    /* hover 效果更明顯 */
+    border-color: rgba(255, 255, 255, 0.8);
+}
+
+
+/* Hero Section 樣式 */
+
+.hero {
+    background: #e3f2fd;
+    padding: 40px 20px;
+    text-align: center;
+    margin-top: 0;
+    /* 確保 header 貼頂，hero 在 header 之下 */
+    flex-shrink: 0;
+    /* 防止 hero 區塊被擠壓 */
+}
+
+.hero h2 {
+    font-size: 2.5em;
+    /* 讓標題更大 */
+    margin-bottom: 15px;
+    color: #2196f3;
+    /* 換個更清新的藍色 */
+}
+
+.hero p {
+    margin-bottom: 25px;
+    font-size: 1.2em;
+    color: #555;
+}
+
+.search-bar {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    /* 垂直居中 */
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.search-bar input {
+    padding: 12px 15px;
+    /* 增加 padding */
+    font-size: 1.1em;
+    /* 調整字體大小 */
+    width: 300px;
+    /* 調整寬度 */
+    border: 1px solid #a7d9f7;
+    /* 淺藍色邊框 */
+    border-radius: 25px;
+    /* 圓潤的輸入框 */
+    outline: none;
+    /* 移除外框 */
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+    /* 內部陰影 */
+}
+
+.search-bar input:focus {
+    border-color: #2196f3;
+    /* focus 時邊框變深藍 */
+    box-shadow: 0 0 8px rgba(33, 150, 243, 0.4);
+    /* focus 時光暈效果 */
+}
+
+.search-bar button {
+    padding: 12px 20px;
+    background: #4caf50;
+    /* 綠色按鈕 */
+    color: white;
+    border: none;
+    border-radius: 25px;
+    /* 圓潤的按鈕 */
+    cursor: pointer;
+    font-size: 1.1em;
+    font-weight: bold;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.search-bar button:hover {
+    background: #388e3c;
+    /* hover 時顏色變深 */
+    transform: translateY(-2px);
+    /* 輕微上移效果 */
+}
+
+
+/* 書籍列表樣式 */
+
+.book-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 25px;
+    /* 增加間距 */
+    margin-top: 30px;
+    /* 增加與上方內容的間距 */
+    justify-content: center;
+    /* 讓書籍卡片居中顯示 */
+    padding: 20px;
+    flex-grow: 1;
+    /* 讓書籍列表佔據剩餘空間 */
+}
+
+.book-card {
+    width: 220px;
+    /* 調整卡片寬度 */
+    border: 1px solid #e0e0e0;
+    border-radius: 10px;
+    /* 更圓潤的卡片邊角 */
+    padding: 15px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    /* 更明顯的陰影 */
+    background: white;
+    text-align: left;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    /* 添加過渡效果 */
+}
+
+.book-card:hover {
+    transform: translateY(-5px);
+    /* 懸停時輕微上浮 */
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+    /* 陰影更深 */
+}
+
+.book-card img {
+    max-width: 100%;
+    height: 180px;
+    /* 固定圖片高度，保持一致性 */
+    object-fit: cover;
+    /* 確保圖片填充，不變形 */
+    border-radius: 8px;
+    /* 圓角圖片 */
+    margin-bottom: 12px;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.book-card h3 {
+    margin: 0 0 8px 0;
+    font-size: 1.3em;
+    color: #3f51b5;
+    /* 藍色標題 */
+}
+
+.book-card p {
+    margin: 5px 0;
+    font-size: 0.95em;
+    color: #666;
+}
+
+
+/* Footer 樣式 */
+
+footer {
+    text-align: center;
+    padding: 20px;
+    background: #3f51b5;
+    color: white;
+    margin-top: 40px;
+    /* 增加與上方內容的間距 */
+    flex-shrink: 0;
+    /* 防止 footer 被擠壓 */
+}
+
+footer p {
+    margin: 0;
+    font-size: 0.9em;
+}
+
+
+/* 響應式設計 */
+
+@media (max-width: 768px) {
+    header {
+        flex-direction: column;
+        /* 小螢幕下 header 內容垂直排列 */
+        align-items: flex-start;
+        /* 標題靠左 */
+        padding: 15px;
+    }
+    .logo-title {
+        width: 100%;
+        text-align: center;
+        /* 標題居中 */
+        margin-bottom: 15px;
+    }
+    header nav {
+        width: 100%;
+        flex-direction: column;
+        /* 導航連結垂直排列 */
+        align-items: center;
+        /* 導航連結居中 */
+        margin-left: 0;
+        /* 移除 auto margin */
+    }
+    header nav a,
+    .user-status .user-link {
+        width: calc(100% - 40px);
+        /* 讓連結佔滿寬度 */
+        text-align: center;
+        margin: 5px 0;
+        /* 調整垂直間距 */
+    }
+    .user-status {
+        width: 100%;
+        margin-left: 0;
+        margin-top: 10px;
+        /* 與上方導航連結的間距 */
+        justify-content: center;
+        /* 內部元素居中 */
+    }
+    .hero {
+        padding: 30px 15px;
+    }
+    .hero h2 {
+        font-size: 2em;
+    }
+    .search-bar input {
+        width: 80%;
+        /* 小螢幕下輸入框佔更寬 */
+    }
+    .book-list {
+        padding: 15px;
+        gap: 15px;
+    }
+    .book-card {
+        width: calc(50% - 15px);
+        /* 兩列布局 */
+        max-width: 250px;
+        /* 限制最大寬度 */
+    }
+}
+
+@media (max-width: 480px) {
+    .book-card {
+        width: 90%;
+        /* 單列布局，更寬 */
+    }
+    .hero h2 {
+        font-size: 1.8em;
+    }
+    .search-bar button {
+        width: 100%;
+        /* 按鈕佔滿寬度 */
+    }
+}

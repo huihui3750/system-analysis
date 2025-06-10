@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>註冊</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC&display=swap" rel="stylesheet" />
+
+    <style>
+        /* 全域樣式設定，統一字型與盒模型 */
+        
+        * {
+            box-sizing: border-box;
+            font-family: "Noto Sans TC", sans-serif;
+        }
+        /* 背景與版面配置 */
+        
+        body {
+            margin: 0;
+            background: #f0f2f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        /* 表單容器樣式 */
+        
+        .form-container {
+            background-color: white;
+            padding: 40px 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 400px;
+        }
+        /* 標題樣式 */
+        
+        h2 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+        }
+        /* 表單元素樣式 */
+        
+        form {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        input[type="text"],
+        input[type="password"],
+        input[type="email"],
+        input[type="tel"] {
+            padding: 12px 15px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        
+        input[type="text"]:focus,
+        input[type="password"]:focus,
+        input[type="email"]:focus,
+        input[type="tel"]:focus {
+            border-color: #007bff;
+            outline: none;
+        }
+        
+        button[type="submit"] {
+            background-color: #007bff;
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 5px;
+            font-size: 18px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            margin-top: 10px;
+        }
+        
+        button[type="submit"]:hover {
+            background-color: #0056b3;
+        }
+        /* 角色選擇樣式 */
+        
+        .role-selection {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .role-option {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            padding: 10px 20px;
+            border: 2px solid #ccc;
+            border-radius: 25px;
+            transition: all 0.3s ease;
+            position: relative;
+            /* For the checkmark */
+        }
+        
+        .role-option input[type="radio"] {
+            display: none;
+            /* Hide the actual radio button */
+        }
+        
+        .role-option span {
+            font-size: 16px;
+            font-weight: bold;
+            color: #555;
+            transition: color 0.3s;
+        }
+        
+        .role-option .checkmark {
+            width: 20px;
+            height: 20px;
+            border: 2px solid #ccc;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 8px;
+            position: relative;
+            transition: border-color 0.3s;
+        }
+        
+        .role-option .checkmark.checked {
+            border-color: #007bff;
+            background-color: #007bff;
+        }
+        
+        .role-option .checkmark.checked::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 8px;
+            height: 8px;
+            background: white;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+        }
+        
+        .role-option:hover {
+            border-color: #007bff;
+        }
+        /* 連結樣式 */
+        
+        p {
+            text-align: center;
+            margin-top: 20px;
+            color: #666;
+        }
+        
+        p a {
+            color: #007bff;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        
+        p a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="form-container">
+        <h2>📝 註冊新帳戶</h2>
+        <form id="registerForm" action="register_process.php" method="POST">
+            <input type="text" id="registerAccount" name="account" placeholder="請輸入帳號" required>
+            <input type="password" id="registerPassword" name="password" placeholder="請輸入密碼" required>
+            <input type="password" id="confirmPassword" placeholder="請再次輸入密碼" required>
+            <input type="email" id="registerEmail" name="email" placeholder="請輸入電子郵件" required>
+
+            <div class="role-selection">
+                <label class="role-option">
+                    <input type="radio" name="role" value="buyer">
+                    <span class="checkmark"></span>
+                    <span>買家</span>
+                </label>
+                <label class="role-option">
+                    <input type="radio" name="role" value="seller">
+                    <span class="checkmark"></span>
+                    <span>賣家</span>
+                </label>
+            </div>
+
+            <button type="submit">註冊</button>
+
+            <p>已經有帳號了？<a href="login.html">登入</a></p>
+        </form>
+    </div>
+
+    <script>
+        // 客戶端驗證：密碼一致性檢查和角色選擇檢查
+        document.getElementById("registerForm").addEventListener("submit", function(e) {
+            const password = document.getElementById("registerPassword").value;
+            const confirm = document.getElementById("confirmPassword").value;
+            const roleSelected = document.querySelector('input[name="role"]:checked'); // 檢查是否有 radio button 被選中
+
+            if (password !== confirm) {
+                alert("密碼不一致！");
+                e.preventDefault(); // 阻止表單提交
+                return;
+            }
+
+            if (!roleSelected) {
+                alert("請選擇您的角色 (買家或賣家)！");
+                e.preventDefault(); // 阻止表單提交
+                return;
+            }
+            // 如果所有客戶端驗證都通過，表單將會提交到 register.php
+        });
+
+        // 為角色選項切換選中樣式 (此部分與你原有程式碼相同，只是為了視覺效果)
+        document.querySelectorAll('.role-option input[type="radio"]').forEach(radio => {
+            radio.addEventListener('change', () => {
+                document.querySelectorAll('.role-option').forEach(label => {
+                    label.querySelector('span').classList.remove('checked');
+                });
+                radio.nextElementSibling.classList.add('checked');
+            });
+        });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+
+<head>
+    <meta charset="UTF-8">
+    <title>登入</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC&display=swap" rel="stylesheet" />
+    <style>
+        /* 全域樣式設定，統一字型與盒模型 */
+        
+        * {
+            box-sizing: border-box;
+            font-family: "Noto Sans TC", sans-serif;
+        }
+        /* 背景與版面配置 */
+        
+        body {
+            margin: 0;
+            background: #f0f2f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        /* 表單容器樣式 */
+        
+        .form-container {
+            background-color: white;
+            padding: 40px 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 400px;
+        }
+        /* 標題樣式 */
+        
+        h2 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 28px;
+        }
+        /* 表單元素樣式 */
+        
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        input[type="text"],
+        input[type="password"] {
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            outline: none;
+        }
+        
+        input[type="text"]:focus,
+        input[type="password"]:focus {
+            border-color: #3f51b5;
+            box-shadow: 0 0 0 2px rgba(63, 81, 181, 0.2);
+        }
+        /* 按鈕樣式 */
+        
+        button[type="submit"] {
+            padding: 12px;
+            background-color: #3f51b5;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        
+        button[type="submit"]:hover {
+            background-color: #303f9f;
+        }
+        /* 連結樣式 */
+        
+        p {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 14px;
+            color: #666;
+        }
+        
+        p a {
+            color: #3f51b5;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        
+        p a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="form-container">
+        <h2>🔐 登入帳戶</h2>
+        <form id="loginForm" action="login_process.php" method="POST">
+            <input type="text" id="loginAccount" name="account" placeholder="請輸入帳號" required>
+            <input type="password" id="loginPassword" name="password" placeholder="請輸入密碼" required>
+            <button type="submit">登入</button>
+            <p>還沒有帳號？<a href="register.html">註冊</a></p>
+        </form>
+    </div>
+
+    <script>
+        // 移除舊的 localStorage 登入邏輯和初始化數據的腳本
+        // 因為現在登入將由 login_process.php 處理
+
+        // 頁面載入時檢查是否已經登入，如果已登入則直接跳轉到首頁
+        // (此處假設 PHP 登入成功後會將用戶重定向，或設置 cookie/session，前端可以根據此判斷)
+        // 更穩健的做法是，首次載入 index.html 時，讓 PHP 判斷是否登入
+        document.addEventListener("DOMContentLoaded", () => {
+            // 這個前端判斷 localStorage 的方式，在純前端模式下有用
+            // 如果轉為後端模式，通常會讓後端判斷登入狀態並直接重定向
+            // 或者，您可以讓 login_process.php 在成功登入後，將登入資訊寫入 localStorage
+            // 但如果 PHP 已經執行了重定向，這段 JS 就不會執行
+            const currentUser = JSON.parse(localStorage.getItem("currentUser"));
+            if (currentUser && currentUser.account) {
+                // 如果已經有登入資訊 (來自 PHP 寫入 localStorage 或直接跳轉)，直接跳轉到首頁
+                // 這裡的邏輯可能會與後端重定向衝突，通常只需要 PHP 重定向即可
+                // 如果想保持前端重定向的平滑性，可以在 login_process.php 成功後，輸出這段JS
+                // 或使用 AJAX 登入
+                // For now, let's assume PHP handles the redirection.
+                // window.location.href = "index.html";
+            }
+        });
+    </script>
+</body>
+
+</html>
